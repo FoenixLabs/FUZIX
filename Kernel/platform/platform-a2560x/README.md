@@ -1,6 +1,6 @@
 # A2560X
 
-A2560X belongs to (larger family of machines)[https://wiki.c256foenix.com/index.php?title=Main_Page] 
+A2560X belongs to [larger family of machines](https://wiki.c256foenix.com/index.php?title=Main_Page)
 created by Stefany Allaire. 
 
 This is my first attempt to bring FUZIX to Foenix machines, so there is many
@@ -31,8 +31,8 @@ able to build whole system without problems.
 
 Compiling FUZIX itself requires only two commands:
 
-    make 
-    make diskimage
+    make TARGET=a2560x
+    make TARGET=a2560x diskimage
 
 After that, in directory `Images/a2560x/` will be built all required binaries,
 especially `disk.img` - a 40MB disk image that can be used in
@@ -119,7 +119,7 @@ zero less) and second parameter to `100` (one zero more).
 
 ### SD Card
 
-There is no SD card support in Morfeo, on real hardware there is only
+There is no SD card support in MORFE/O, on real hardware there is only
 a read-only block support. SPI interface is planned in future.
 
 ### PS/2 Keyboard
@@ -129,21 +129,25 @@ uses first).  Current version of `ps2kbd.c` in FUZIX doesn't support custom
 keymaps and one available is designed for UK keyboard, so Your mileage may
 vary.
 
+This port uses custom initialization procedure because I need to disable
+scancode translation on `8402` controller, used in A2560X, that feature
+is not available in standard FUZIX.
+
 ### Matrix keyboards
 
-Versions used by A2560K or F256K2 will be supported in other ports and
-- problably - backported here.
+Versions used by A2560K or F256K2 will be supported in other ports and,
+problably, will be backported here.
 
 ### Interrupts
 
-Very rudimentary - KBD and TIMER0. I don't have a experience with interrupts on
-m68k platforms, so I mostly cargo-culted code from other ports.
+Very rudimentary - KBD and TIMER0. I don't have a experience with interrupts 
+on m68k platforms, so I mostly cargo-culted code from other ports.
 
 ### Screen
 
 At this moment only screen B on A2560X and MORFE/O. Current routines are very
-slow thus I don't recommend to use `vi` - it works, but it looks ugly. There is
-also `ed` available.
+slow thus I don't recommend to use `vi` - it works, but terrible slow. There 
+is also `ed` available. [Be brave!](https://www.redhat.com/en/blog/introduction-ed-editor).
 
 VT console lack attributes support.
 
@@ -151,7 +155,7 @@ VT console lack attributes support.
 
 - in future use a `DISCARD` area that contains code, used solely during start
   and after initialization re-used as memory. It is not important for A2560X,
-  but smaller platform should benefit from that.
+  but smaller platforms should benefit from that.
 
 ## Trophies
 

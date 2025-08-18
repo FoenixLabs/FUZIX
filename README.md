@@ -4,7 +4,7 @@
 > created by Stefany Allaire.
 >
 > Current status:
-> - [A2560X](https://github.com/aniou/FUZIX/)/A2560K/A2560U/GenX is available
+> - [A2560X](https://github.com/aniou/FUZIX/tree/foenix/Kernel/platform/platform-a2560x)/A2560K/A2560U/GenX is available
 > - F256K2 - planned
 
 ** ENGINEERING WORK IN PROGRESS **
