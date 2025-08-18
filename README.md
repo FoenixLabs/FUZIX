@@ -1,9 +1,8 @@
 
 > [!IMPORTANT]
-> This is a port of FUZIX to [various Foenix machines](https://wiki.c256foenix.com/index.php?title=Main_Page)
-> created by Stefany Allaire.
+> This is a port of FUZIX to Foenix machines family, created by Stefany Allaire.
 >
-> Current status:
+> Current status (click for details):
 > - [A2560X](https://github.com/aniou/FUZIX/tree/foenix/Kernel/platform/platform-a2560x)/A2560K/A2560U/GenX is available
 > - F256K2 - planned
 
