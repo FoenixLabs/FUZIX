@@ -1,3 +1,12 @@
+
+> [!IMPORTANT]
+> This is a port of FUZIX to [various Foenix machines](https://wiki.c256foenix.com/index.php?title=Main_Page)
+> created by Stefany Allaire.
+>
+> Current status:
+> - [A2560X](https://github.com/aniou/FUZIX/)/A2560K/A2560U/GenX is available
+> - F256K2 - planned
+
 ** ENGINEERING WORK IN PROGRESS **
 
 The Z80 side of the tree is currently moving to the new compiler including
