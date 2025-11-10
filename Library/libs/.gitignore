@@ -8,3 +8,7 @@ m6809.lib
 termcap*.lib
 readline*.lib
 m*.lib
+crt0_68000.s
+crt0nostdio_68000.s
+setjmp_68000.s
+
