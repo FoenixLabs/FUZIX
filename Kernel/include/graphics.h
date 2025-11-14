@@ -32,6 +32,8 @@ struct display {
 #define FMT_3BPP_U16	137	/* 5 x 3bpp pixels a word (top bit unused) */
 #define FMT_THOMSON_C16	138	/* Interleaved packed pixel */
 #define FMT_THOMSON_TO7	139	/* two colours per 8 pixel row */
+#define FMT_A2560X_8PAL 140 /* 8bit pixels indexing palette of 256 colours */
+#define FMT_A2560X_ARGB 141 /* 32bit pixels representing colours as ARGB */
   uint8_t hardware;
 #define HW_UNACCEL	1	/* Simple display */
 #define HW_VDP_9918A	128	/* Not neccessarily MSX... */

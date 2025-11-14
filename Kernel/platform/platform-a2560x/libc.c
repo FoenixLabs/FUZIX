@@ -51,4 +51,21 @@ int memcmp(const void *a, const void *b, size_t n)
   return 0;
 }
 
+void *memmove(void *d, const void *s, size_t sz)
+{
+  unsigned char *dp = d;
+  const unsigned char *sp = s;
+  if (sp >= dp) {
+    while(sz--)
+      *dp++=*sp++;
+  } else {
+    dp += sz;
+    sp += sz;
+    while(sz--)
+      *--dp=*--sp;
+  }
+  return d;
+}
+
+
 // eof
