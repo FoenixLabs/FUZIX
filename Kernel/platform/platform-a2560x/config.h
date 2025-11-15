@@ -8,9 +8,7 @@
 /* that platforms can use multiple resolutions */
 signed char a2560k_b_text_width();
 signed char a2560k_b_text_height();
-signed char a2560k_b_text_stride();
 
-#define VT_WIDTH  a2560k_b_text_stride()
 #define VT_RIGHT  a2560k_b_text_width()
 #define VT_BOTTOM a2560k_b_text_height()
 

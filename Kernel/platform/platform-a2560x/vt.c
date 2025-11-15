@@ -2,83 +2,78 @@
 #include <kernel.h>
 #include <tty.h>
 #include <vt.h>
-#include "A2560K/vky_chan_b.h"
+#include "mcp_types.h"
 
-uint8_t vtattr_cap = VTA_INVERSE;
+void txt_a2560k_b_set_xy(short x, short y);
+void txt_a2560k_b_get_xy(short x, short y);
+short txt_a2560k_b_get_region(p_rect region);
+short txt_a2560k_b_set_region(p_rect region);
+void txt_a2560k_b_fill(char c);
+void txt_a2560k_b_put(char c);
+void txt_a2560k_b_scroll(short horizontal, short vertical);
 
-static unsigned char *cpos;
-static unsigned char csave;
-static unsigned char color;
+/* for begginging no inverse, no italic etc. */
+uint8_t vtattr_cap = 0;
 
-static uint8_t *char_addr(unsigned int y1, unsigned char x1)
+void cursor_off()
 {
-	return VKY3_B_TEXT_MATRIX + VT_WIDTH * y1 + (uint16_t)x1;
 }
 
-static uint8_t *color_addr(unsigned int y1, unsigned char x1)
-{
-	return VKY3_B_COLOR_MATRIX + VT_WIDTH * y1 + (uint16_t)x1;
-}
-
-void cursor_off(void)
-{
-	if (cpos)
-		*cpos = csave;
-}
-
-/* Only needed for hardware cursors */
-void cursor_disable(void)
+void cursor_disable()
 {
 }
 
 void cursor_on(int8_t y, int8_t x)
 {
-	cpos = char_addr(y, x);
-	csave = *cpos;
-	*cpos = VT_MAP_CHAR(VT_CURSOR_CHAR);
-}
-
-void plot_char(int8_t y, int8_t x, uint16_t c)
-{
-	*char_addr(y, x) = VT_MAP_CHAR(c);
-    *color_addr(y, x) = color;
-}
-
-void clear_lines(int8_t y, int8_t ct)
-{
-	unsigned char *s = char_addr(y, 0);
-    unsigned char *c = color_addr(y, 0);
-	memset(s, VT_MAP_CHAR(' '), ct * VT_WIDTH);
-    memset(c, color, ct * VT_WIDTH);
+    txt_a2560k_b_set_xy(x, y);
 }
 
 void clear_across(int8_t y, int8_t x, int16_t l)
 {
-	unsigned char *s = char_addr(y, x);
-    unsigned char *c = color_addr(y, x);
-	memset(s, VT_MAP_CHAR(' '), l);
-    memset(c, color, l);
+    t_rect region, old_region;
+
+    txt_a2560k_b_get_region(&old_region);
+    region.origin.x = x;
+    region.origin.y = y;
+    region.size.width = l;
+    region.size.height = 1;
+    txt_a2560k_b_set_region(&region);
+    txt_a2560k_b_fill(' ');
+    txt_a2560k_b_set_region(&old_region);
 }
 
-void vtattr_notify(void)
+void clear_lines(int8_t y, int8_t ct)
 {
-    if (vtattr & VTA_INVERSE) {
-        color = ((vtpaper & 0x0f) << 4) | (vtink & 0x0f);
-    } else {
-        color = ((vtink & 0x0f) << 4) | (vtpaper & 0x0f);
-    }    
+    t_rect region, old_region;
+
+    txt_a2560k_b_get_region(&old_region);
+    region.origin.x = 0;
+    region.origin.y = y;
+    region.size.width = VT_RIGHT + 1;
+    region.size.height = ct;
+    txt_a2560k_b_set_region(&region);
+    txt_a2560k_b_fill(' ');
+    txt_a2560k_b_set_region(&old_region);
 }
 
 void scroll_up(void)
 {
-	memmove(VKY3_B_TEXT_MATRIX, VKY3_B_TEXT_MATRIX + VT_WIDTH, VT_WIDTH * VT_BOTTOM);
-    memmove(VKY3_B_COLOR_MATRIX, VKY3_B_COLOR_MATRIX + VT_WIDTH, VT_WIDTH * VT_BOTTOM);
+	txt_a2560k_b_scroll(0, 1);
 }
 
 void scroll_down(void)
 {
-	memmove(VKY3_B_TEXT_MATRIX + VT_WIDTH, VKY3_B_TEXT_MATRIX, VT_WIDTH * VT_BOTTOM);
-    memmove(VKY3_B_COLOR_MATRIX + VT_WIDTH, VKY3_B_COLOR_MATRIX, VT_WIDTH * VT_BOTTOM);
+	txt_a2560k_b_scroll(0, -1);
+}
+
+void plot_char(int8_t y, int8_t x, uint16_t c)
+{
+	txt_a2560k_b_set_xy(x, y);
+    txt_a2560k_b_put(c);    
+}
+
+void vtattr_notify(void)
+{
 }
 
 // eof
