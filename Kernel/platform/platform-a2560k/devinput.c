@@ -1,0 +1,48 @@
+#include <kernel.h>
+#include <kdata.h>
+#include <input.h>
+#include <devinput.h>
+#include <printf.h>
+
+unsigned char buf[32];
+static struct s_queue kqueue = {
+ buf, buf, buf, sizeof(buf), 0, sizeof(buf) / 2
+};
+
+/* Queue a character to the input device */
+void queue_input(uint8_t c)
+{
+    insq(&kqueue, c);                                                                                                                
+    wakeup(&kqueue);
+}
+
+void poll_input(void)
+{
+    wakeup(&kqueue);
+}
+
+void plt_input_wait(void)
+{
+    psleep(&kqueue);    /* We wake this on timers so it works for sticks */
+}
+
+int plt_input_write(uint8_t flag)
+{
+    used(flag);
+    udata.u_error = EINVAL;
+    return -1;
+}
+
+int plt_input_read(uint8_t *slot)
+{
+    uint8_t r, k;
+    if (remq(&kqueue, &r)) {
+        remq(&kqueue, &k);
+        *slot++ = KEYPRESS_CODE | r;
+        *slot++ = k;
+        return 2;
+    }
+    return 0;
+}
+
+// eof
