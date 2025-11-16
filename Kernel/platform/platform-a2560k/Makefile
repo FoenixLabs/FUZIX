@@ -9,7 +9,7 @@ MODEL ?= 11
 
 CSRCS  = devtty.c devrtc.c
 CSRCS += devices.c main.c libc.c
-CSRCS += screen.c
+CSRCS += screen.c devgfx.c
 CSRCS += vt.c
 CSRCS += devinput.c timers.c interrupt.c
 #CSRCS += devsdc.c 

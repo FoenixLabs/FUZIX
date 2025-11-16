@@ -88,6 +88,12 @@ static void format(int n) {
     case FMT_THOMSON_TO7:
       printf("Thomson TO7");
       break;
+    case FMT_A2560X_8PAL:
+      printf("Foenix 256 colour");
+      break;
+    case FMT_A2560X_ARGB:
+      printf("Foenix ARGB colour");
+      break;
     default:
       printf("Unknown(%d)", n);
   }
