@@ -23,3 +23,5 @@ size.report
 *.elf
 bin
 *.debug
+*.s68
+*.rom
