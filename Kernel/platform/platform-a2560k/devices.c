@@ -9,7 +9,6 @@
 #include <devrd.h>
 #include "ps2_reg.h"
 #include "devgfx.h"
-
 /*
 struct devsw dev_tab[] : This table holds the functions to call for device
 driver operations. Each device major number has open, close, read, write and
@@ -59,10 +58,8 @@ bool validdev(uint16_t dev)
 // it is called after IRQ enable, thus timers needs it
 void device_init(void)
 {
-  devide_init();
-  //devsdc_init();
   devsd_init();
-
+  devide_init();  
   timers_init();
 }
 

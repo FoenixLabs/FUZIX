@@ -12,8 +12,7 @@ CSRCS += devices.c main.c libc.c
 CSRCS += screen.c devgfx.c
 CSRCS += vt.c
 CSRCS += devinput.c timers.c interrupt.c
-#CSRCS += devsdc.c 
-CSRCS += superio.c ps2.c ring_buffer.c
+CSRCS += superio.c ps2.c
 CSRCS += a2560x_sdcard_driver.c
 #CSRCS += devrd.c
 COBJS = $(CSRCS:.c=$(BINEXT))
