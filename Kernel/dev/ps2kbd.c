@@ -40,6 +40,8 @@ extern uint8_t inputtty;		/* FIXME */
 #define inputtty 1
 #endif
 
+static void kbd_set_leds(uint_fast8_t byte);
+
 static const uint8_t keymap[256]  = {
     /* 00 - 0F */
     0, KEY_F9, 0, KEY_F5, KEY_F3, KEY_F1, KEY_F2, KEY_F12,
@@ -67,13 +69,13 @@ static const uint8_t keymap[256]  = {
 
     /* 50-5F */
     0, 0, '\'', 0, '[', '=', 0, 0,
-    0/*CL*/, 0/*RS*/, KEY_ENTER, ']', 0, '#', 0, 0,
+    0/*CL*/, 0/*RS*/, KEY_ENTER, ']', 0, '\\', 0, 0,
 
 #define CAPSLOCK 0x58
 #define RSHIFT 0x59
 
     /* 60-6F */
-    0, '\\', 0, 0, 0, 0, KEY_BS, 0,
+    0, 0, 0, 0, 0, 0, KEY_BS, 0,
     0, '1', 0, '4', '7', 0, 0, 0,		/* Keypad */
 
     /* 70-7F */
@@ -84,19 +86,26 @@ static const uint8_t keymap[256]  = {
 
     /* E0 00 - E0 0F */
     0, 0, 0, KEY_F7, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0/*FIXME*/, 0,
+    0, 0, 0, 0, 0, 0, '~', 0,
 
     /* E0 10 - E0 1F */
     0, 0/*RALT*/, 0, 0, 0/*RCTRL*/, 'Q', '!', 0,
-    0, 0, 'Z', 'S', 'A', 'W', '"', 0/*LWIN*/,
+    0, 0, 'Z', 'S', 'A', 'W', '@', 0/*LWIN*/,
+
+    //0, 0/*RALT*/, 0, 0, 0/*RCTRL*/, 'Q', '!', 0,
+    //0, 0, 'Z', 'S', 'A', 'W', '"', 0/*LWIN*/,    
 
 #define RALT 0x91
 #define RCTRL 0x94
 #define LWIN 0x9F
 
     /* E0 20 - E0 2F */
-    0, 'C', 'X', 'D', 'E', '$', KEY_POUND, 0/*RWIN*/,
+    0, 'C', 'X', 'D', 'E', '$', '#', 0/*RWIN*/,
     0, 0, 'V', 'F', 'T', 'R', '%', 0/*WINMENU*/,
+    
+    /* E0 20 - E0 2F */
+//    0, 'C', 'X', 'D', 'E', '$', KEY_POUND, 0/*RWIN*/,
+//    0, 0, 'V', 'F', 'T', 'R', '%', 0/*WINMENU*/,    
 
 #define RWIN 0xA7
 
@@ -105,12 +114,12 @@ static const uint8_t keymap[256]  = {
     0, 0, 'M', 'J', 'U', '&', '*', 0,
 
     /* E0 40 - E0 4F */
-    0, '<', 'K', 'T', 'O', ')', '(', 0,
-    0, '>', '/', 'L', ':', 'P', '_', 0,		/* / is on keypad */
+    0, '<', 'K', 'I', 'O', ')', '(', 0,
+    0, '>', '?', 'L', ':', 'P', '_', 0,		/* / is on keypad */
 
     /* E0 50 - E0 5F */
-    0, 0, '@', 0, '{', '+', 0, 0,
-    0, 0, KEY_ENTER, '}', 0, '~', 0, 0,
+    0, 0, '"', 0, '{', '+', 0, 0,
+    0, 0, KEY_ENTER, '}', 0, '|', 0, 0,
     
     /* E0 60 - E0 6F */
     0, '|', 0, 0, 0, 0, 0, 0,
@@ -143,7 +152,7 @@ static void keycode(uint_fast8_t code, uint_fast8_t up, uint_fast8_t shifted)
     uint_fast8_t key;
     uint_fast8_t m = 0;
 
-
+    //kprintf("[code][up][shifted]: %x, %x, %x\n", code, up, shifted);
     if (brk) {
         --brk;
         /* TODO when brk hits 0 report it properly */
@@ -164,6 +173,18 @@ static void keycode(uint_fast8_t code, uint_fast8_t up, uint_fast8_t shifted)
 
     if (shifted)
         code |= 0x80;
+
+    /* caps lock, shift and friends all send autorepeat so care needed */
+    if (code == CAPSLOCK) {
+        capslock ^= up;		/* On the up toggle capslock */
+        if (capslock)
+            kbd_set_leds(0x4); //1 (scroll lock), 2 (numlock), 4 (capslock)
+        else 
+            kbd_set_leds(0x0);
+        /* Eventually we need to drive the LEDs */
+        return;
+    }
+
 
     if (up) {
         if (keyboard_grab == 3) {
@@ -198,12 +219,6 @@ static void keycode(uint_fast8_t code, uint_fast8_t up, uint_fast8_t shifted)
     else if (code == RALT)
         alt_down |= 2;
 
-    /* caps lock, shift and friends all send autorepeat so care needed */
-    if (code == CAPSLOCK) {
-        capslock ^= up;		/* On the up toggle capslock */
-        /* Eventually we need to drive the LEDs */
-        return;
-    }
 
     key = keymap[code];
 
