@@ -687,7 +687,6 @@ void txt_a2560k_b_init() {
 
     /* Set the cursor */
     txt_a2560k_b_set_cursor(1, 0, 0xB1);
-    txt_a2560k_b_set_cursor_visible(0);
 
     /* Set the border */
     txt_a2560k_b_set_border(8, 8);                            /* Set up the border */

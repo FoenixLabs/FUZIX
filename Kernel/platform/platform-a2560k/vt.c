@@ -22,8 +22,6 @@ static uint8_t *color_addr(unsigned int y1, unsigned char x1)
 
 void cursor_off(void)
 {
-	if (cpos)
-		*cpos = csave;
 }
 
 /* Only needed for hardware cursors */
@@ -33,9 +31,7 @@ void cursor_disable(void)
 
 void cursor_on(int8_t y, int8_t x)
 {
-	cpos = char_addr(y, x);
-	csave = *cpos;
-	*cpos = VT_MAP_CHAR(VT_CURSOR_CHAR);
+	*VKY3_B_CPR = ((y & 0xffff) << 16) | (x & 0xffff);
 }
 
 void plot_char(int8_t y, int8_t x, uint16_t c)
