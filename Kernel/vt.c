@@ -2,7 +2,73 @@
 #include <tty.h>
 #include <vt.h>
 
-#ifdef CONFIG_VT
+#if defined(CONFIG_TSM)
+/*
+ * TSM - Terminal Emulator State Machine
+ * origin: https://github.com/Aetf/libtsm
+ * 
+ * For 32bit machines
+ * Supports DEC vt100-vt520 and xterm
+ * Supports 24bit true color
+ *
+ * The caller is required to provide
+ *
+ * void vt_screen_draw_cb (struct tsm_screen *con,
+				   uint32_t id,
+				   const uint32_t *ch,
+				   size_t len,
+				   unsigned int width,
+				   unsigned int posx,
+				   unsigned int posy,
+				   const struct tsm_screen_attr *attr,
+				   tsm_age_t age,
+				   void *data);
+*/
+
+static struct vt_ctx ctx;
+
+static void terminal_write_fn(struct tsm_vte *vte,
+			      const char *u8,
+			      size_t len,
+			      void *data)
+{
+}
+
+static void terminal_log_fn(void *data,
+			    const char *file,
+			    int line,
+			    const char *fn,
+			    const char *subs,
+			    unsigned int sev,
+			    const char *format,
+			    va_list args)
+{
+}
+
+void vtrender(void)
+{
+	ctx.age = tsm_screen_draw(ctx.con, vt_screen_draw_cb, (void*)&ctx);
+}
+
+void vtinit(void)
+{
+	
+	int r = tsm_screen_new(&ctx.con, terminal_log_fn, NULL);
+	if(r < 0) {
+		// fatal error
+	}
+
+	r = tsm_vte_new(&ctx.vte, ctx.con,
+			terminal_write_fn,
+			NULL,
+			terminal_log_fn,
+			NULL);
+	if(r < 0) {
+		// fatal error
+	}
+}
+
+#elif defined(CONFIG_VT)
 
 
 #include <devtty.h>
@@ -462,5 +528,44 @@ void scroll_down(void)
 	memmove(VT_BASE + VT_WIDTH, VT_BASE, VT_WIDTH * VT_BOTTOM);
 }
 
+#endif /* !CONFIG_TSM */
+
+int vt_inproc(uint_fast8_t minor, uint_fast8_t c)
+{
+#ifdef CONFIG_UNIKEY
+	if (c == KEY_POUND) {
+		tty_inproc(minor, 0xC2);
+		return tty_inproc(minor, 0xA3);
+	}
+	if (c == KEY_HALF) {
+		tty_inproc(minor, 0xC2);
+		return tty_inproc(minor, 0xBD);
+	}
+	if (c == KEY_DOT) {
+		tty_inproc(minor, 0xC2);
+		return tty_inproc(minor, 0xB7);
+	}
+	if (c == KEY_EURO) {
+		tty_inproc(minor, 0xE2);
+		tty_inproc(minor, 0x82);
+		return tty_inproc(minor, 0xAC);
+	}
+        if (c == KEY_YEN) {
+		tty_inproc(minor, 0xC2);
+		return tty_inproc(minor, 0xA5);
+	}
+	if (c == KEY_COPYRIGHT) {
+		tty_inproc(minor,0xC2);
+		return tty_inproc(minor, 0xA9);
+	}
 #endif
+	if (c > 0x9F) {
+		tty_inproc(minor, KEY_ESC);
+		c &= 0x7F;
+	}
+	return tty_inproc(minor, c);
+}
+
+
+
 #endif

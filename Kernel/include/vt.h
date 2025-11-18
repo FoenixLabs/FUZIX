@@ -21,6 +21,29 @@
 #define VT_INITIAL_LINE 0
 #endif
 
+#if defined(CONFIG_TSM)
+
+#include <libtsm.h>
+
+struct vt_ctx {
+	struct tsm_screen *con;
+	struct tsm_vte *vte;
+	uint32_t age;
+};
+
+extern int vt_screen_draw_cb (struct tsm_screen *con,
+				   uint32_t id,
+				   const uint32_t *ch,
+				   size_t len,
+				   unsigned int width,
+				   unsigned int posx,
+				   unsigned int posy,
+				   const struct tsm_screen_attr *attr,
+				   tsm_age_t age,
+				   void *data);
+
+#else
+
 struct vt_switch {
   uint8_t vtmode;
   uint8_t vtattr;
@@ -72,5 +95,7 @@ extern uint8_t vtattr_cap;
 extern uint8_t vtink;
 extern uint8_t vtpaper;
 extern struct vt_repeat keyrepeat;
+
+#endif /* !CONFIG_TSM */
 
 #endif

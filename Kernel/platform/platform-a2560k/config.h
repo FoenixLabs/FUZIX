@@ -2,7 +2,7 @@
  *	Set these top setings according to your board if different
  */
 
-#define CONFIG_VT
+#define CONFIG_TSM
 #define CONFIG_FONT8X8
 
 /* that platforms can use multiple resolutions */

@@ -822,8 +822,9 @@ static pid_t getty(const char **argv, const char *id)
 				/* Physical consoles are extended VT52 so
 				   set the terminal type if not forced by
 				   the user */
-				if (!argv[1] || !argv[2])
-					envset("TERM", "vt52");
+				if (!argv[1] || !argv[2]) {
+					envset("TERM", "vt100");
+				}					
 			}
 
 			if (argv[1]) {
