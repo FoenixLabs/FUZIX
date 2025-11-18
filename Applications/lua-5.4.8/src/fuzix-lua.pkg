@@ -1,0 +1,4 @@
+package lua
+if-cpu 68000
+f 0755 /usr/bin/lua	       lua
+f 0755 /usr/bin/luac       luac

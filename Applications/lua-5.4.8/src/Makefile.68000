@@ -1,0 +1,28 @@
+include $(FUZIX_ROOT)/Target/rules.68000
+
+CORE_O =	lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o lundump.o lvm.o lzio.o
+LIB_O =	lauxlib.o lbaselib.o lcorolib.o ldblib.o liolib.o lmathlib.o loadlib.o loslib.o lstrlib.o ltablib.o lutf8lib.o linit.o strftime.o
+BASE_O = $(CORE_O) $(LIB_O)
+LUA_O =	lua.o
+LUAC_O = luac.o
+
+APPS = lua luac
+
+CFLAGS += -DFUZIX -DLUA_USE_C89 -std=c89
+
+all: $(APPS)
+
+lua: $(CRT0) $(LUA_O) $(BASE_O)
+	$(LINKER) $^ -o $@ $(LINKER_OPT) $(LINKER_TAIL) -lm68000
+
+luac: $(CRT0) $(LUAC_O) $(BASE_O)
+	$(LINKER) $^ -o $@ $(LINKER_OPT) $(LINKER_TAIL) -lm68000
+
+size.report: $(APPS)
+	ls -l $^ > $@
+
+clean:
+	rm -f $(APPS) *.o core *~ *.asm *.lst *.sym *.map *.noi *.lk *.ihx *.tmp *.bin size.report *~
+
+rmbak:
+	rm -f *~ core
