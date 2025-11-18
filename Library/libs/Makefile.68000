@@ -46,7 +46,7 @@ SRC_C += socket.c sprintf.c sputl.c stat.c statvfs.c stdio0.c stime.c
 SRC_C += strcasecmp.c strcasestr.c strdup.c stricmp.c strlcpy.c strncasecmp.c
 SRC_C += strnlen.c strnicmp.c strsep.c strxfrm.c strcoll.c strsignal.c
 SRC_C += strtod.c strtol.c swab.c swapon.c system.c
-SRC_C += telldir.c time.c tmpfile.c tmpnam.c ttyname.c
+SRC_C += telldir.c time.c mktime.c tmpfile.c tmpnam.c ttyname.c
 SRC_C += tzset.c umount.c ungetc.c usleep.c utent.c utimes.c utsname.c
 SRC_C += vfork.c vfprintf.c vprintf.c wait.c xitoa.c pathconf.c
 SRC_C += gethostname.c sysconf.c confstr.c memccpy.c getpass.c
@@ -96,11 +96,11 @@ SRC_LM += lrint.c lround.c
 SRC_LM += modf.c nearbyint.c pow.c
 SRC_LM += remquo.c rint.c round.c
 SRC_LM += scalbn.c
-SRC_LM += sin.c sincos.c sinh.c
+SRC_LM += sin.c sincos.c sinh.c cos.c tan.c
 SRC_LM += sqrt.c tgamma.c
 SRC_LM += __expo2.c __double_bits.c __fpclassify.c __log1p.c
 SRC_LM += __sin.c __cos.c __tan.c __sindf.c __cosdf.c __tandf.c
-SRC_LM += m68k_fpgnulib.c
+SRC_LM += m68k_fpgnulib.c __rem_pio2.c __rem_pio2_large.c
 
 OBJ_C = $(SRC_C:.c=.o)
 OBJ_CURS = $(SRC_CURS:.c=.o)

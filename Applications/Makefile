@@ -2,11 +2,14 @@
 APPS = util cmd sh games cave cpm v7games games cursesgames \
        as09 ld09 netd MWC flashrom ue cpmfs plato \
        emulators cpnet dw assembler CC cpp ar \
-       2048
+       2048 lua
 
 .PHONY: $(APPS)
 
 all:	$(APPS)
+
+lua:
+	+(cd lua-5.4.8/src; $(MAKE) -f Makefile.$(USERCPU))
 
 util:
 	+(cd util; $(MAKE) -f Makefile.$(USERCPU))
@@ -84,6 +87,7 @@ ar:
 	+(cd ar; $(MAKE) -f Makefile.$(USERCPU))
 
 clean:
+	(cd lua-5.4.8/src; $(MAKE) -f Makefile.$(USERCPU) clean)
 	(cd util; $(MAKE) -f Makefile.$(USERCPU) clean)
 	(cd V7/cmd; $(MAKE) -f Makefile.$(USERCPU) clean)
 	(cd V7/cmd/sh; $(MAKE) -f Makefile.$(USERCPU) clean)

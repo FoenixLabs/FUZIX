@@ -27,6 +27,7 @@ union fshape {
 	uint32_t bits;
 };
 
+#define STRICT_ASSIGN(type, lval, rval) ((lval) = (type)(rval))
 
 /* Check platform actually has a real double type */
 #ifndef double
