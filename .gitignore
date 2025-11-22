@@ -25,3 +25,4 @@ bin
 *.debug
 *.s68
 *.rom
+.vscode/
