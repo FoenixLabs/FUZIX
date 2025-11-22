@@ -21,7 +21,10 @@ jobs:
     - name: Archiving to fuzix_a2560k.zip
       run: zip -r fuzix_a2560k.zip Images/a2560k
 
-    - uses: actions/upload-artifact@v4
+    - uses: TheDoctor0/zip-release@0.7.6
       with:
-        path: fuzix_a2560k.zip
+        filename: fuzix_a2560k.zip
+        directory: Images/a2560k
+        exclusions: filesys*
+    
 
