@@ -1,6 +1,7 @@
 /*
  *	Set these top setings according to your board if different
  */
+#define TTY_INIT_BAUD B115200
 
 #define CONFIG_VT
 #define CONFIG_FONT8X8
@@ -11,6 +12,8 @@ signed char a2560k_b_text_height();
 
 #define VT_RIGHT  a2560k_b_text_width()
 #define VT_BOTTOM a2560k_b_text_height()
+
+#define A2560K_KBD   0
 
 /* Enable to make ^Z dump the inode table for debug */
 #undef CONFIG_IDUMP
@@ -37,6 +40,11 @@ signed char a2560k_b_text_height();
 
 #define TICKSPERSEC 10   /* Ticks per second */
 
+// Normally
+// TTY1 is the Screen
+// TTY2 is the COM1
+// TTY3 is the COM2
+#define TTY_INIT_BAUD B115200
 #define BOOT_TTY (512 + 1)   /* Set this to default device for stdio, stderr */
                             /* In this case, the default is the first TTY device */
                             /* Temp FIXME set to serial port for debug ease */
@@ -45,16 +53,20 @@ signed char a2560k_b_text_height();
 #define CMDLINE	NULL	  /* Location of root dev name */
 
 /* Device parameters */
-#define NUM_DEV_TTY 2
-#define TTYDEV   BOOT_TTY /* Device used by kernel for messages, panics */
+#define NUM_DEV_TTY 3   // 3 TTY Devices right now TTY0 = Screen0, TTY1 = COM1, TTY2 = COM2
+#define TTYDEV    BOOT_TTY
 
 /* Could be bigger but we need to add hashing first and it's not clearly
    a win with a CF card anyway */
 #define NBUFS    16       /* Number of block buffers */
 #define NMOUNTS	 4	  /* Number of mounts at a time */
 
-#define MAX_BLKDEV 5 /* IDE SD ROM RAM */
+#define MAX_BLKDEV   5 /* IDE SD ROM RAM */
 #define CONFIG_IDE
+
+// SDCard Implementation
+#define CONFIG_SD
+#define SD_DRIVE_COUNT 2   // Set to 2 when A2560M/A2560 PRO/FA2560K2 Core otherwise only 1 SDcard on board
 
 #define CONFIG_INPUT
 #define CONFIG_INPUT_GRABMAX    3
@@ -73,8 +85,14 @@ signed char a2560k_b_text_height();
 
 /* #define BOOTDEVICENAMES "hd#,,,,,,,,rd"*/
 #define BOOTDEVICENAMES "hd#"
+
 /* undefine, if want to be asked */
-#define BOOTDEVICE 1
+//
+#define BOOTDEVICE 0x0001  //hda1 - External SDCard
+//#define BOOTDEVICE 0x0011  //hdb1 - External SDCard ???
+//#define BOOTDEVICE 0x0021  //hdc1 - Internal SDCard (FA2560K2/A2560M/A2560MPro)
+
+
 
 /* Memory backed devices
  *

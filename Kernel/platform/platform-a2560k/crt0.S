@@ -81,7 +81,7 @@ vectors:
         long    e_unexpected       ; 63 - Reserved
         long    int_kbd            ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
         long    int_kbd_mau        ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mau (short for Maurice))
-        long    e_uninit           ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
+        long    int_mse            ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
         long    e_uninit           ; 67 - Interrupt 0x13 - SuperIO - COM1
         long    e_uninit           ; 68 - Interrupt 0x14 - SuperIO - COM2
         long    e_uninit           ; 69 - Interrupt 0x15 - SuperIO - LPT1

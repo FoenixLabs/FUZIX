@@ -10,7 +10,8 @@
         .globl outchar
         .globl plt_monitor
         .globl int_kbd
-		.globl int_timer0
+        .globl int_timer0
+        .globl clear_cpu_ipl
 
         .globl devide_read_data
         .globl devide_write_data
@@ -48,8 +49,20 @@ init_hardware:
         move.w d0,procmem       ; guesses for now
         jsr txt_a2560k_b_init
         jsr vtinit
-
+        jsr LPC_Reset       ; Go through a Reset Cycle for the A2560K
+        jsr LPC_Config      ; Inititalize the SuperIO Different Memory Zone
+        jsr superio_init    ; Intialize a bunch of registers and start the fan and Leds
+        jsr early_COM1_init ; Make sure to setup the UART(COM1) with a consistant 115K8N1 for TTY use early on
+        jsr early_COM2_init ; Make sure to setup the UART(COM2) with a consistant 115K8N1 for TTY use early on
         rts
+
+clear_cpu_ipl:
+        ;andi.w #$F8FF,sr
+        clr.l d0 
+        move.w sr,d0
+        lea $FEC00106,a0
+        move d0,(a0)
+        rts         
 
 int_timer0:
     movem.l a0/a1/a5/d0/d1,-(sp)
@@ -301,4 +314,314 @@ tx_block:
     move.b  d0,(a2)+
     dbra.w  d4,tx_block
     movem.l (sp)+,a2/d2-d4
+    rts
+
+LPC_Reset:
+    movem.l d2-d3,-(sp)
+    ; Changing the Power ON LED Value (Corner of the unit)
+    move.l  #$FEC00008,a0
+    move.l  #$00D02102,d0   ;
+    move.l  d0,(a0)    ; 
+
+    move.l  #$FEC00000,a0
+    ; Make sure the LPC is not RESET
+    move.l  (a0),d0    ; Read the Content of Gavin Master Control Register
+    and     #$00000000,d0 ; Clear the entire register so led can be turned off
+    or      #$00000101,d0
+    move.l  d0,(a0)    ; LPC = 1 (not reset)
+    
+    ; FIRST DELAY LOOP
+    clr.l   d0         ; We need to create a loop for delay
+lpc_delay1_loop:
+    add.l   #$1,d0 
+    cmpi.l  #$00010000,d0       ; Let's do 2048 Cycles
+    bne     lpc_delay1_loop
+    
+    ; Now RESET the LPC
+    move.l  (a0),d0    ; Read the Content of Gavin Master Control Register
+    and     #$FFFFFEFF,d0
+    move.l  d0,(a0)    ; LPC = 1 (not reset)
+
+    ; SECOND DELAY LOOP (800,000 Cycles)
+    clr.l   d0         ; We need to create a loop for delay
+lpc_delay2_loop:
+    add.l   #$1,d0 
+    cmpi.l  #$00080000,d0       ; Let's do 800000 Cycles
+    bne     lpc_delay2_loop
+
+    ; FINALY, unreset the LPC and wait again for a moment
+    move.l  (a0),d0    ; Read the Content of Gavin Master Control Register
+    or      #$00000100,d0
+    move.l  d0,(a0)    ; LPC = 1 (not reset)
+
+    ; THIRD DELAY LOOP (800,000 Cycles)
+    clr.l   d0         ; We need to create a loop for delay
+lpc_delay3_loop:
+    add.l   #$1,d0 
+    cmpi.l  #$00020000,d0       ; Let's do 400000 Cycles
+    bne     lpc_delay3_loop
+
+    ; Normally, getting out of that Routine, the LPC should be ready to be configured and ready to go
+    movem.l (sp)+,d2-d3
+    rts
+
+LPC_Config:
+    movem.l d2-d3,-(sp)
+    move.l  #$FEC0202E,a0   ; 0xFEC0202E
+    move.l  #$FEC0202F,a1   ; 0xFEC0202F
+    clr.l   d0
+    clr.l   d1
+    ; Enter Config Device Address Space
+    move.b  #$55,d0 
+    move.b  d0,(a0)         ; This gets us in the configuration mode 
+    ; Let's setup device 0 - (floppy)
+    ; LD (03F0)
+    move.b  #$07,d0     ; Offset Regiset
+    move.b  #$00,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_H (Base Address)
+    move.b  #$60,d0     ; Offset Regiset
+    move.b  #$03,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_L (Base Address)
+    move.b  #$61,d0     ; Offset Regiset
+    move.b  #$F0,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT6 
+    move.b  #$70,d0     ; Offset Regiset
+    move.b  #$06,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; ENABLE Zone
+    move.b  #$30,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+
+    ; Let's setup device 3 - (Parallel Port)
+    ; LD (0378)
+    move.b  #$07,d0     ; Offset Regiset
+    move.b  #$03,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_H (Base Address)
+    move.b  #$60,d0     ; Offset Regiset
+    move.b  #$03,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_L (Base Address)
+    move.b  #$61,d0     ; Offset Regiset
+    move.b  #$78,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT7
+    move.b  #$70,d0     ; Offset Regiset
+    move.b  #$07,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; Parallel Port Mode 
+    move.b  #$F0,d0     ; Offset Regiset
+    move.b  #$3A,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)    
+    ; ENABLE Zone
+    move.b  #$30,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+
+    ; Let's setup device 4 - (Serial Port COM1)
+    ; LD (03F8)
+    move.b  #$07,d0     ; Offset Regiset
+    move.b  #$04,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_H (Base Address)
+    move.b  #$60,d0     ; Offset Regiset
+    move.b  #$03,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_L (Base Address)
+    move.b  #$61,d0     ; Offset Regiset
+    move.b  #$F8,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT4
+    move.b  #$70,d0     ; Offset Regiset
+    move.b  #$04,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; ENABLE Zone
+    move.b  #$30,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+
+    ; Let's setup device 5 - (Serial Port COM2)
+    ; LD (02F8)
+    move.b  #$07,d0     ; Offset Regiset
+    move.b  #$05,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_H (Base Address)
+    move.b  #$60,d0     ; Offset Regiset
+    move.b  #$02,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_L (Base Address)
+    move.b  #$61,d0     ; Offset Regiset
+    move.b  #$F8,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT3
+    move.b  #$70,d0     ; Offset Regiset
+    move.b  #$03,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; ENABLE Zone
+    move.b  #$30,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+
+    ; Let's setup device 7 - (Keyboard PS2)
+    ; LD (0060)
+    move.b  #$07,d0     ; Offset Regiset
+    move.b  #$07,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_H (Base Address)
+    move.b  #$60,d0     ; Offset Regiset
+    move.b  #$00,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_L (Base Address)
+    move.b  #$61,d0     ; Offset Regiset
+    move.b  #$60,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT1 (Keyboard)
+    move.b  #$70,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT2 (Mouse)
+    move.b  #$72,d0     ; Offset Regiset
+    move.b  #$02,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; ENABLE Zone
+    move.b  #$30,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+
+    ; Let's setup device 9 - (GAME Port)
+    ; LD (0200)
+    move.b  #$07,d0     ; Offset Regiset
+    move.b  #$09,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_H (Base Address)
+    move.b  #$60,d0     ; Offset Regiset
+    move.b  #$02,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_L (Base Address)
+    move.b  #$61,d0     ; Offset Regiset
+    move.b  #$00,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT0 (no Interrupt)
+    move.b  #$70,d0     ; Offset Regiset
+    move.b  #$00,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; ENABLE Zone
+    move.b  #$30,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+
+    ; Let's setup device A - (PME)
+    ; LD (0100)
+    move.b  #$07,d0     ; Offset Regiset
+    move.b  #$0A,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_L (Base Address)
+    move.b  #$60,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_H (Base Address)
+    move.b  #$61,d0     ; Offset Regiset
+    move.b  #$00,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT0 (no Interrupt)
+    move.b  #$70,d0     ; Offset Regiset
+    move.b  #$00,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; ENABLE Zone
+    move.b  #$30,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+
+    ; Let's setup device A - (MIDI)
+    ; LD (0330)
+    move.b  #$07,d0     ; Offset Regiset
+    move.b  #$0B,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_L (Base Address)
+    move.b  #$60,d0     ; Offset Regiset
+    move.b  #$03,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; BA_H (Base Address)
+    move.b  #$61,d0     ; Offset Regiset
+    move.b  #$30,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; INT5 (no Interrupt)
+    move.b  #$70,d0     ; Offset Regiset
+    move.b  #$05,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)
+    ; ENABLE Zone
+    move.b  #$30,d0     ; Offset Regiset
+    move.b  #$01,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value)        
+
+    ; Power Management - Turn all the devices ON
+    move.b  #$22,d0     ; Offset Regiset
+    move.b  #$FF,d1     ; Device #
+    move.b  d0,(a0)     ; Store in 2E (offset)
+    move.b  d1,(a1)     ; Store in 2F (Value) 
+
+    ; Exit Config Device Address Space (we are done)
+    ; Now we ought to have full control over all devices:
+    ; Floppy Controller
+    ; Parallel Port
+    ; Keyboard PS2 8042 Controller
+    ; Serial 1
+    ; Serial 2
+    ; PME 
+    ; MIDI
+    move.b  #$AA,d0 
+    move.b  d0,(a0)         ; This gets us in the configuration mode 
+
+
+    move.l  #$FEC02147,a0   ; 0xFEC02147 - GP60 REG
+    move.b  #$84,d0     
+    move.b  d0,(a0)         ;
+
+    movem.l (sp)+,d2-d3
     rts

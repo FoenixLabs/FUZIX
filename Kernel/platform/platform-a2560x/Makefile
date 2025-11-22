@@ -1,5 +1,10 @@
 
 # see sys_general.h for model number, 8 == A2560X
+# MODEL_FOENIX_A2560X         8 (GENX)
+# MODEL_FOENIX_A2560U         9
+# MODEL_FOENIX_A2560K         11
+# MODEL_FOENIX_A2560M         12
+# MODEL_FOENIX_FA2560K2       13
 MODEL ?= 8
 
 CSRCS  = devtty.c devrtc.c
@@ -7,8 +12,8 @@ CSRCS += devices.c main.c libc.c
 CSRCS += screen.c
 CSRCS += vt.c
 CSRCS += devinput.c timers.c interrupt.c
-CSRCS += devsdc.c
-CSRCS += ps2.c
+CSRCS += superio.c ps2.c
+CSRCS += a2560x_sdcard_driver.c
 #CSRCS += devrd.c
 COBJS = $(CSRCS:.c=$(BINEXT))
 
@@ -17,7 +22,8 @@ ASRCS += tricks.S
 AOBJS = $(ASRCS:.S=.o)
 
 DSRCS =  ../../dev/devide.c ../../dev/mbr.c
-DSRCS += ../../dev/blkdev.c ../../dev/devide_discard.c
+DSRCS += ../../dev/blkdev.c ../../dev/devide_discard.c 
+DSRCS += ../../dev/devsd.c ../../dev/devsd_discard.c
 DSRCS += ../../dev/bq4845.c ../../dev/ps2kbd.c
 #DSRCS += ../../dev/devrd.c
 DOBJS = $(patsubst ../../dev/%.c,%.o, $(DSRCS))

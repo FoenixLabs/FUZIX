@@ -11,6 +11,7 @@
         .globl plt_monitor
         .globl int_kbd
 		.globl int_kbd_mau
+        .globl int_mse
         .globl int_timer0
         .globl clear_cpu_ipl
 
@@ -53,6 +54,8 @@ init_hardware:
         jsr LPC_Reset       ; Go through a Reset Cycle for the A2560K
         jsr LPC_Config      ; Inititalize the SuperIO Different Memory Zone
         jsr superio_init    ; Intialize a bunch of registers and start the fan and Leds
+        jsr early_COM1_init ; Make sure to setup the UART(COM1) with a consistant 115K8N1 for TTY use early on
+        jsr early_COM2_init ; Make sure to setup the UART(COM2) with a consistant 115K8N1 for TTY use early on
         rts
 
 clear_cpu_ipl:
@@ -68,10 +71,10 @@ int_timer0:
     jsr local_timer_interrupt
     movem.l (sp)+,a0-a1/a5/d0/d1
 	rte
-
+; Serve PS2 Keyboard Interrupt
 int_kbd:
     movem.l a0/a1/a5/d0/d1,-(sp)
-    jsr ps2_int
+    jsr ps2_kbd_irq
     movem.l (sp)+,a0-a1/a5/d0/d1
     rte
 
@@ -79,6 +82,13 @@ int_kbd:
 int_kbd_mau:
     movem.l a0/a1/a5/d0/d1,-(sp)
     jsr mau_int
+    movem.l (sp)+,a0-a1/a5/d0/d1
+    rte
+
+; Serve PS2 Keyboard Interrupt
+int_mse: 
+    movem.l a0/a1/a5/d0/d1,-(sp)
+    jsr ps2_mse_irq
     movem.l (sp)+,a0-a1/a5/d0/d1
     rte
 

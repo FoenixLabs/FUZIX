@@ -9,7 +9,7 @@
 #include "timers.h"
 #include "ps2.h"
 #include "../include/A2560K/gabe_a2560k.h"
-#include "ring_buffer.h"
+//#include "ring_buffer.h"
 /* these bits are ripped-off from dev/ps2.c file from FoenixMCP 
  * with all rights reserved to original authors (see README.md)
  *
@@ -358,7 +358,7 @@ short ps2_init() {
     */
     // disable forced translation to scancode 1 and enable interrupts for m&k
     // Write Config Byte
-    status = ps2_controller_cmd_param(PS2_CTRL_WRITECMD, 0x03);  /* %00000011 */
+    status = ps2_controller_cmd_param(PS2_CTRL_WRITECMD, 0x0F);  /* %00000011 */
     kprintf("PS2 Write CTRL CMD(0x60)\n");
 
     status = ps2_controller_cmd(PS2_CTRL_READCMD);  // Read Config Byte
@@ -378,14 +378,16 @@ short ps2_init() {
     // Ideally, we would attempt a re-enable several times, but this doesn't work on the U/U+ for some keyboards
     // Make sure everything is read
     ps2_flush_out();
+    /*
     status = 0;
     while ( status != 0x00FA ) {
         status = ps2_kbd_cmd(KBD_CMD_ENABLE, 0);
     }
-	kprintf("PS2 Write CMD(0xF4) %x\n", status);    
+	kprintf("PS2 Write CMD(0xF4) %x\n", status);
+    */
 
     // Make sure everything is read
-    ps2_flush_out();
+    //ps2_flush_out();
 
     // set scancode page 2
     status = 0x0000;
@@ -399,20 +401,22 @@ short ps2_init() {
 
     // Clear any pending keyboard interrupts
     int_clear(INT_KBD_PS2);
+    int_clear(INT_MOUSE);    
    // Enable the keyboard interrupt
     int_enable(INT_KBD_PS2);
+    int_enable(INT_MOUSE);    
     kprintf("Interrupt Pending Group1: %x\n", PENDING_GRP0[1]);
     kprintf("Interrupt Mask Group1: %x\n", MASK_GRP0[1]);
-	kprintf("PS2 Keyboard interrupt enabled.\n\n");
+	kprintf("PS2 Keyboard interrupt enabled.\n");
     ps2busy = 0;
     return 1;   // keyboard present
 }
 
 
-void ps2_int(void)
+void ps2_kbd_irq(void)
 {
     unsigned char x = *PS2_DATA_BUF;
-    kprintf("ps2_interrupts: %x\n", x);
+    //kprintf("ps2_Kbd_interrupts: %x\n", x);
     int_clear(INT_KBD_PS2);
 
     if (x == 0xFA) {        // mystery stray 0xFA on A2560X kbd after irq enable
@@ -421,6 +425,15 @@ void ps2_int(void)
     //kprintf("ps2_interrupts: %x\n", x);
     ps2kbd_byte(x);
 }
+
+void ps2_mse_irq( void ) {
+    unsigned char mouse_byte = *PS2_DATA_BUF;
+
+    kprintf("ps2_Mouse_interrupts: %x\n", mouse_byte);
+    int_clear(INT_MOUSE);
+
+}
+
 
 int ps2kbd_put(uint_fast8_t c)
 {

@@ -8,7 +8,7 @@
 
 #include "sys_general.h"
 
-#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560X
 #include "A2560K/ps2_a2560k.h"
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "A2560U/ps2_a2560u.h"
@@ -50,6 +50,7 @@
 
 #define KBD_CMD_RESET       0xFF    /* Keyboard command: reset the keyboard */
 #define KBD_CMD_ENABLE      0xF4    /* Keyboard command: enable to keyboard */
+#define KBD_CMD_SCANCODESET 0xF0    /* Keyboard command: Get/Set Scan Code */
 #define KBD_CMD_SET_LED     0xED    /* Keyboard command: set the LEDs */
 
 #define MOUSE_CMD_PREFIX    0xD4    /* Controller code to prefix all mouse commands */

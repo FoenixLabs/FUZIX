@@ -70,4 +70,25 @@ void int_enable(unsigned short n) {
 }
 
 
+/*
+ * Disable an interrupt by masking it
+ *
+ * Interrupt number is made by the group number and number within the group.
+ * For instance, the RTC interrupt would be 0x1F and the Channel A SOF interrupt would be 0x00.
+ *
+ * Inputs:
+ * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
+ */
+void int_disable(unsigned short n) {
+	/* Find the group (the relevant interrupt mask register) for the interrupt */
+	unsigned short group = int_group(n);
+
+	/* Find the mask for the interrupt */
+	unsigned short mask = int_mask(n);
+	unsigned short new_mask = MASK_GRP0[group] | mask;
+
+	/* Set the mask bit for the interrupt in the correct MASK register */
+	MASK_GRP0[group] = new_mask;
+}
+
 // eof

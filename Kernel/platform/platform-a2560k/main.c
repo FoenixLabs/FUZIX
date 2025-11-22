@@ -11,10 +11,14 @@
 #include "superio.h"
 #include "ps2.h"
 
-uint16_t swap_dev = 0xFFFF;
+extern short ps2_init();
+extern void tty_poll(uint_fast8_t minor);
 
+uint16_t swap_dev = 0xFFFF;
 void do_beep(void)
 {
+
+
 }
 
 /*
@@ -68,7 +72,7 @@ void pagemap_init(void)
     	kprintf("ps2: Init Controller & report PS2 Presence\n");
     	ps2kbd_present = ps2_init();        // platform-specific routine
     	if (ps2kbd_present) {
-    		kprintf("ps2: keyboard found\n");
+    		kprintf("ps2: keyboard found\n\n");
     	}
 	}
 }
@@ -93,8 +97,8 @@ uint8_t plt_udata_set(ptptr p) {
 
 // UART Interrupt - To be addressed in time
 void plt_interrupt(void) {
-    tty_interrupt();
-	kprintf("A key has been pressed\n");
+    //tty_interrupt();
+	//kprintf("A key has been pressed\n");
 }
 
 void local_timer_interrupt(void)
@@ -109,13 +113,14 @@ void local_timer_interrupt(void)
 void plt_idle(void)
 {
     irqflags_t flags = di();
-    tty_poll();
+    tty_poll(2);	// Go Poll COM1 (minor 2) tty2 (COM1)
+	tty_poll(3);	// Go Poll COM2 (minor 3) tty3 (COM2)
     irqrestore(flags);
 }
 
 void plt_copyright(void)
 {
-        kprintf("\nFoenix A2560K port version 0.1\n2025 Piotr Meyer <aniou@smutek.pl>");
+        kprintf("\nFoenix A2560Kxx port version 0.1\n2025 Piotr Meyer <aniou@smutek.pl>");
 		kprintf("\nCredits for all the Low-Level Code Coming from MCP, Peter Weingartner\n\n");
 }
 

@@ -7,7 +7,7 @@
 #include <tty.h>
 #include <vt.h>
 #include <devrd.h>
-
+#include "ps2_reg.h"
 /*
 struct devsw dev_tab[] : This table holds the functions to call for device
 driver operations. Each device major number has open, close, read, write and
@@ -25,7 +25,7 @@ struct devsw dev_tab[] =  /* The device driver switch table */
 // -----------------------------------------------------------------
   /* 0: /dev/hd     Disc block devices  */
   {  blkdev_open,  no_close,    blkdev_read,   blkdev_write, blkdev_ioctl },
-  /* 1: /dev/fd     Hard disc block devices (absent) */
+  /* 1: /dev/fd     Floppy disc block devices (absent) */
   {  nxio_open,    no_close,    no_rdwr,       no_rdwr,      no_ioctl     },
   /* 2: /dev/tty    TTY devices */
   {  tty_open,     tty_close,   tty_read,      tty_write,    vt_ioctl     },
@@ -57,8 +57,9 @@ bool validdev(uint16_t dev)
 // it is called after IRQ enable, thus timers needs it
 void device_init(void)
 {
-  devide_init();
-  devsdc_init();
+  devsd_init();
+  devide_init();  
   timers_init();
+  //tty_setup(1, 3);
 }
 
