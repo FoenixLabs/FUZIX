@@ -1,0 +1,29 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    container: daschewie/fuzix_gcc:latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Make a2560k
+      run: make TARGET=a2560k diskimage
+
+    - name: Archiving to fuzix_a2560k.zip
+      run: zip -r fuzix_a2560k.zip Images/a2560k
+
+    - name: Upload the zip file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzix_a2560k.zip
+          path: fuzix_a2560k.zip
+
