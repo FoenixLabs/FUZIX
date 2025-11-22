@@ -15,10 +15,8 @@ jobs:
 
     - name: Make a2560k
       run: make TARGET=a2560k diskimage
-
-    - name: Archive a2560k.tar.gz
-      run: tar -czvf a2560k.tar.gz Images/a2560k
     
     - uses: actions/upload-artifact@v4
       with:
-        path: a2560k.tar.gz
+        name: a2560k
+        path: Images/a2560k
