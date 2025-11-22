@@ -6,17 +6,20 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     container: daschewie/fuzix_gcc:latest
+    strategy:
+      fail-fast: false # keep on building even if one target fails
+      matrix:
+        target: [a2560k,a2560x]
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Make a2560k
-      run: make TARGET=a2560k diskimage
+    - name: Make ${{ matrix.target }}
+      run: make TARGET=${{ matrix.target }} diskimage
     
     - uses: actions/upload-artifact@v4
       with:
-        name: a2560k
-        path: Images/a2560k
+        name: ${{ matrix.target }}
+        path: Images/${{ matrix.target }}
