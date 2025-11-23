@@ -8,7 +8,7 @@ LUAC_O = luac.o
 
 APPS = lua luac
 
-CFLAGS += -DFUZIX -DLUA_USE_C89 -std=c89
+CFLAGS += -DFUZIX -DLUA_USE_C89 -std=c99
 
 all: $(APPS)
 

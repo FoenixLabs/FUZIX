@@ -1900,3 +1900,5 @@ void luaV_execute (lua_State *L, CallInfo *ci) {
 }
 
 /* }================================================================== */
+#define NANOPRINTF_IMPLEMENTATION
+#include "nanoprintf.h"
