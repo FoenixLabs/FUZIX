@@ -4,6 +4,7 @@
 
 #ifdef CONFIG_VT
 
+#define CLAMP(x, low, high) (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
 #include <devtty.h>
 /*
@@ -81,6 +82,7 @@ static signed char cursorx;
 static signed char cursory = VT_INITIAL_LINE;
 static signed char ncursory;
 static uint8_t cursorhide;
+static uint8_t disable_wrap;
 static uint8_t vtpend;
 static uint8_t vtbusy;
 
@@ -92,7 +94,7 @@ static void cursor_fix(void)
 	}
 	if (cursory < 0)
 		cursory = 0;
-	if (cursorx > VT_RIGHT) {
+	if (cursorx > VT_RIGHT && !disable_wrap) {
 		cursorx = 0;
 		cursory++;
 	}
@@ -134,7 +136,9 @@ static void charout(unsigned char c)
 			return;
 		}
 	}
-	plot_char(cursory, cursorx, c);
+	if ((disable_wrap && cursorx <= VT_RIGHT) || !disable_wrap) {
+		plot_char(cursory, cursorx, c);
+	}
 	cursorx++;
 fix:
 	cursor_fix();
@@ -198,6 +202,12 @@ static int escout(unsigned char c)
 		cursorhide = 1;
 		cursor_disable();
 		return 0;
+	}
+	if (c == 'w') {
+		disable_wrap = 1;
+	}
+	if (c == 'v') {
+		disable_wrap = 0;
 	}
 	if (c == 'Y')
 		return 2;
