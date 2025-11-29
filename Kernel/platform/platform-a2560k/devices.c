@@ -59,6 +59,9 @@ bool validdev(uint16_t dev)
 void device_init(void)
 {
   devsd_init();
+#ifdef CONFIG_NET
+    netdev_init();
+#endif  
   devide_init();  
   timers_init();
 }

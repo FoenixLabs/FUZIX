@@ -14,6 +14,7 @@ CSRCS += vt.c
 CSRCS += devinput.c timers.c interrupt.c
 CSRCS += superio.c ps2.c
 CSRCS += a2560x_sdcard_driver.c
+CSRCS += devnet.c
 #CSRCS += devrd.c
 COBJS = $(CSRCS:.c=$(BINEXT))
 
@@ -28,12 +29,15 @@ DSRCS += ../../dev/bq4845.c ../../dev/ps2kbd.c
 #DSRCS += ../../dev/devrd.c
 DOBJS = $(patsubst ../../dev/%.c,%.o, $(DSRCS))
 
+NSRCS = ../../dev/net/net_w5x00.c
+NOBJS = $(patsubst ../../dev/net/%.c,%.o, $(NSRCS))
+
 LSRCS = ../../lib/68000exception.c ../../lib/68000usercopy.c ../../lib/68000relocate.c
 LOBJS = $(patsubst ../../lib/%.c,%.o, $(LSRCS))
 
-OBJS  = $(COBJS) $(AOBJS) $(DOBJS) $(LOBJS)
+OBJS  = $(COBJS) $(AOBJS) $(DOBJS) $(LOBJS) $(NOBJS)
 
-CROSS_CCOPTS += -I../../dev/ -I./include/ -DMODEL=$(MODEL)
+CROSS_CCOPTS += -I../../dev/ -I../../dev/net -I./include/ -DMODEL=$(MODEL)
 
 all:	$(OBJS)
 
@@ -44,6 +48,9 @@ $(AOBJS): %.o: %.S
 	$(CROSS_AS) $(ASOPTS) $< -o $*.o
 
 $(DOBJS): %.o: ../../dev/%.c
+	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
+
+$(NOBJS): %.o: ../../dev/net/%.c
 	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
 
 $(LOBJS): %.o: ../../lib/%.c
@@ -57,9 +64,9 @@ clean:
 
 image:
 	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld \
-	$(LOBJS) $(COBJS) $(DOBJS) \
+	$(LOBJS) $(COBJS) $(DOBJS) $(NOBJS) \
 	p68000.o tricks.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
-	../../timer.o ../../kdata.o \
+	../../timer.o ../../kdata.o ../../network.o ../../syscall_net.o \
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
 	../../syscall_proc.o ../../syscall_other.o ../../mm.o ../../flat.o \
 	../../blk512.o ../../tty.o ../../devsys.o ../../usermem.o ../../syscall_fs2.o \

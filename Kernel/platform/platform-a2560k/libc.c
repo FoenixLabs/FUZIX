@@ -36,6 +36,18 @@ size_t strlen(const char *p)
   return e-p-1;
 }
 
+int strcmp(const char *a, const char *b)
+{
+	--a;
+	--b;
+	while(*++a == *++b);
+	if (*a == 0)
+		return 0;
+	if (*a > *b)
+		return -1;
+	return 1;
+}
+
 int memcmp(const void *a, const void *b, size_t n)
 {
   const uint8_t *ap = a;
