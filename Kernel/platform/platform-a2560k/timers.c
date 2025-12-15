@@ -1,4 +1,4 @@
-
+#include "config.h"
 #include <kernel.h>
 #include <printf.h>
 #include "timers_reg.h"
@@ -27,17 +27,23 @@ void timers_init() {
     *TIMER_TCR0      = TCR_ENABLE_0 | TCR_CNTUP_0 | TCR_CLEAR_0 | TCR_INE_0;
     *TIMER_TCR0      = TCR_ENABLE_0 | TCR_CNTUP_0 | TCR_INE_0;
 
+#if defined(CONFIG_DEBUG_LOG)
     kprintf("timer ctrl %x value %d compare %d\n", *TIMER_TCR0, *TIMER_VALUE_0, *TIMER_COMPARE_0);
     kprintf("timer ctrl %x value %d compare %d\n", *TIMER_TCR0, *TIMER_VALUE_1, *TIMER_COMPARE_1);
     kprintf("timer ctrl %x value %d compare %d\n", *TIMER_TCR0, *TIMER_VALUE_2, *TIMER_COMPARE_2);
+#endif
 
     long timer_ticks;
     timer_ticks = rtc_get_jiffies() + 50;
     do {
+#if defined(CONFIG_DEBUG_LOG)
             kprintf("jiffies value %d\n", rtc_get_jiffies() );
+#endif
     } while (rtc_get_jiffies() > timer_ticks);
 
+#if defined(CONFIG_DEBUG_LOG)
     kprintf("timer ctrl %x value %d compare %d\n", *TIMER_TCR0, *TIMER_VALUE_0, *TIMER_COMPARE_0);
+#endif
 
     int_enable(INT_TIMER0); 
     return;

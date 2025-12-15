@@ -58,11 +58,18 @@ bool validdev(uint16_t dev)
 // it is called after IRQ enable, thus timers needs it
 void device_init(void)
 {
+  kprintf("\n");
+  kprintf("Initializing Block Devices\n");
+  kprintf("============================\n");
   devsd_init();
-#ifdef CONFIG_NET
-    netdev_init();
-#endif  
   devide_init();  
   timers_init();
+  kprintf("\n");
+#ifdef CONFIG_NET
+  kprintf("Initializing Network Devices\n");
+  kprintf("============================\n");
+  netdev_init();
+  kprintf("\n");
+#endif  
 }
 

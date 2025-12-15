@@ -132,7 +132,7 @@ void w5x00_setup(void) {
 	//while(n++ < 5000000);
 	//GPOS = 1 << RESETPIN;
 	//spi_set_clock(1, 1);
-    A2560xx_WP5x00_Reset(); // Go reset the external Donbgle Module
+	A2560xx_WP5x00_Reset(); // Go reset the external Donbgle Module
 	n = 0;
 	while(n++ < 5000000);
 	w5x00_writecb(0, 0x80);
@@ -170,7 +170,7 @@ static void W5x00_Wait_Busy( void ) {
 void A2560xx_WP5x00_Reset( void ) {
 	volatile uint32_t n = 0;
 	*W5x00_CTRL = *W5x00_CTRL | W5x00_RESET;
-	while(n++ < 5000000);
+	while(n++ < 500000);
 	*W5x00_CTRL = *W5x00_CTRL & ~W5x00_RESET;
 }
 

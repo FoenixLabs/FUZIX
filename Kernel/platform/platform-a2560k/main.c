@@ -116,8 +116,10 @@ void plt_idle(void)
 
 void plt_copyright(void)
 {
-        kprintf("\nFoenix A2560X port version 0.1\n2025 Piotr Meyer <aniou@smutek.pl>");
-		kprintf("\nCredits for all the Low-Level Code Coming from MCP, Peter Weingartner\n\n");
+	kprintf("Copyright (c) 2021-2022 Peter Weingartner\n");
+	kprintf("Copyright (c) 2025-2026 Piotr Meyer <aniou@smutek.pl>\n");
+	kprintf("Copyright (c) 2025-2026 Stefany Allaire <stef@c256foenix.com>\n");
+	kprintf("Copyright (c) 2025-2026 Jesus Garcia <daschewie@gmail.com>\n");
 }
 
 // eof

@@ -8,6 +8,7 @@
 MODEL ?= 11
 
 CSRCS  = devtty.c devrtc.c
+CSRCS += start.c
 CSRCS += devices.c main.c libc.c
 CSRCS += screen.c devgfx.c
 CSRCS += vt.c
@@ -65,7 +66,7 @@ clean:
 image:
 	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld \
 	$(LOBJS) $(COBJS) $(DOBJS) $(NOBJS) \
-	p68000.o tricks.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
+	p68000.o tricks.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
 	../../timer.o ../../kdata.o ../../network.o ../../syscall_net.o \
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
 	../../syscall_proc.o ../../syscall_other.o ../../mm.o ../../flat.o \

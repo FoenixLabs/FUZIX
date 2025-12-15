@@ -1,3 +1,4 @@
+#include "config.h"
 #include <kernel.h>
 #include <kdata.h>
 #include <input.h>
@@ -404,10 +405,12 @@ short ps2_init() {
     int_clear(INT_MOUSE);    
    // Enable the keyboard interrupt
     int_enable(INT_KBD_PS2);
-    int_enable(INT_MOUSE);    
+    int_enable(INT_MOUSE);
+#if defined(CONFIG_DEBUG_LOG)    
     kprintf("Interrupt Pending Group1: %x\n", PENDING_GRP0[1]);
     kprintf("Interrupt Mask Group1: %x\n", MASK_GRP0[1]);
 	kprintf("PS2 Keyboard interrupt enabled.\n");
+#endif
     ps2busy = 0;
     return 1;   // keyboard present
 }
@@ -597,7 +600,9 @@ uint16_t mau_kbd_get(void)
 
 // A2560Kxx Keyboard Initialization
 short mau_init(void) {
+#if defined(CONFIG_DEBUG_LOG)
     kprintf("A2560Kxx Keyboard Init\n");
+#endif
 
     int_disable(INT_KBD_A2560K);
 
@@ -615,10 +620,12 @@ short mau_init(void) {
     int_clear(INT_KBD_A2560K);
     /* Enable the interrupt for the keyboard */
     int_enable(INT_KBD_A2560K);
+#if defined(CONFIG_DEBUG_LOG)
     kprintf("Interrupt Pending Group1: %x\n", PENDING_GRP0[1]);
     kprintf("Interrupt Mask Group1: %x\n", MASK_GRP0[1]);
 
     kprintf("A2560Kxx Keyboard Init Done\n\n");
+#endif
     ps2busy = 0;    
     return 1;
 }
