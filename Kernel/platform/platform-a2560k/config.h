@@ -1,6 +1,9 @@
 /*
- *	Set these top setings according to your board if different
- */
+**
+** TARGET a2560k
+**
+*/
+
 
 #define TTY_INIT_BAUD B115200
 
@@ -15,6 +18,8 @@ signed char a2560k_b_text_stride();
 #define VT_WIDTH  a2560k_b_text_stride()
 #define VT_RIGHT  a2560k_b_text_width()
 #define VT_BOTTOM a2560k_b_text_height()
+
+/* #define CONFIG_DEBUG_LOG */
 
 #define A2560K_KBD   1
 

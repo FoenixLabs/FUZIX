@@ -1,8 +1,9 @@
 /*
 **
-** TARGET a2560x
+** TARGET a2560x-w5500
 **
 */
+
 
 #define TTY_INIT_BAUD B115200
 
@@ -20,7 +21,16 @@ signed char a2560k_b_text_stride();
 
 /* #define CONFIG_DEBUG_LOG */
 
-#define A2560K_KBD   0
+#define A2560K_KBD   1
+
+/* If you want a W5500 instead of the second card */
+#define CONFIG_ESP_W5500
+
+#ifdef CONFIG_ESP_W5500
+#define CONFIG_NET
+#define CONFIG_NET_WIZNET
+#define CONFIG_NET_W5500
+#endif
 
 /* Enable to make ^Z dump the inode table for debug */
 #undef CONFIG_IDUMP

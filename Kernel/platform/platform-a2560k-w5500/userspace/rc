@@ -1,0 +1,12 @@
+umask 022
+fsck -a /
+setdate
+remount -n / rw
+prtroot >/etc/mtab
+# Load settings from /etc/netrc
+ifconfig eth0 load
+ifconfig eth0
+#Uncomment if you have multiple file systems
+#fsck -a
+#mount -a
+>/var/run/utmp

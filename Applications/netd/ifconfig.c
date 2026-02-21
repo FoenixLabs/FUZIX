@@ -20,6 +20,42 @@ static struct ifreq ifr;
 static struct sockaddr_in *sin = (struct sockaddr_in *)&ifr.ifr_addr;
 static struct sockaddr_hw *shw = (struct sockaddr_hw *)&ifr.ifr_hwaddr;
 
+#define NETRC_PATH "/etc/netrc"
+#define HW_ETH		1
+
+static void trim(char *s)
+{
+	char *p = s;
+	while (isspace((unsigned char)*p)) p++;
+	memmove(s, p, strlen(p) + 1);
+
+	p = s + strlen(s) - 1;
+	while (p >= s && isspace((unsigned char)*p))
+		*p-- = '\0';
+}
+
+static void do_hwaddr_set(const char *mac)
+{
+	unsigned int a[6];
+	int i;
+
+	if (sscanf(mac, "%x:%x:%x:%x:%x:%x",
+	           &a[0], &a[1], &a[2], &a[3], &a[4], &a[5]) != 6) {
+		fprintf(stderr, "ifconfig: invalid mac address '%s'\n", mac);
+		exit(1);
+	}
+
+	shw->shw_family = HW_ETH;
+	for (i = 0; i < 6; i++)
+		shw->shw_addr[i] = a[i];
+
+	if (ioctl(sock, SIOCSIFHWADDR, &ifr) == -1) {
+		perror("SIOCSIFHWADDR");
+		exit(1);
+	}
+}
+
+
 static void do_ip_set(char *p, int ioc, char *op)
 {
 	if (p == NULL) {
@@ -218,6 +254,40 @@ static void list_interfaces(void)
 	}
 }
 
+static void load_netrc(void)
+{
+	FILE *f;
+	char line[256], key[64], val[128];
+
+	f = fopen(NETRC_PATH, "r");
+	if (!f) {
+		perror(NETRC_PATH);
+		exit(1);
+	}
+
+	while (fgets(line, sizeof(line), f)) {
+		trim(line);
+		if (line[0] == '#' || line[0] == '\0')
+			continue;
+
+		if (sscanf(line, "%63s %127s", key, val) != 2)
+			continue;
+
+		if (strcmp(key, "ipaddr") == 0)
+			do_ip_addr_set(val);
+		else if (strcmp(key, "netmask") == 0)
+			do_ip_mask_set(val);
+		else if (strcmp(key, "gateway") == 0)
+			do_ip_gw_set(val);
+		else if (strcmp(key, "mac") == 0)
+			do_hwaddr_set(val);
+		else
+			fprintf(stderr, "ifconfig: unknown netrc key '%s'\n", key);
+	}
+
+	fclose(f);
+}
+
 int main(int argc, char *argv[])
 {
 	unsigned int n = 2;
@@ -239,6 +309,14 @@ int main(int argc, char *argv[])
 		dump_interface();
 		return 1;
 	}
+
+	/* Configuration */
+	if (argc >= 3 && strcmp(argv[2], "load") == 0) {
+		load_netrc();
+		do_flags(IFF_UP, IFF_UP);
+		return 0;
+	}
+	
 	/* Configuration by keyword, implied source address */
 	while(n < argc) {
 		unsigned int s = do_keyword(argv + n);
