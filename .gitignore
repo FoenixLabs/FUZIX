@@ -27,3 +27,4 @@ bin
 *.rom
 .vscode/
 CLAUDE.md
+.tree/
