@@ -66,7 +66,7 @@ endif
 C3SRCS += devsys.c mm.c swap.c page.c usermem.c timer.c audio.c level2.c
 C3SRCS += devinput.c
 CVIDEOSRCS = vt.c
-CFONTSRCS = font/font4x6.c font/font6x8.c font/font8x8.c font/font8x8_exp2.c font/font4x8.c
+CFONTSRCS = font/font4x6.c font/font6x8.c font/font8x8.c font/font8x8_exp2.c font/font4x8.c font/font8x16.c
 
 CNETSRCS = network.c
 

@@ -19,7 +19,7 @@
 
 
 /* default, FUZIX-wide font */
-extern unsigned char fontdata_8x8[];
+extern unsigned char fontdata_8x16[];
 
 
 /*
@@ -217,44 +217,25 @@ short txt_a2560k_b_set_resolution(short width, short height) {
     // If no size specified, set it based on the DIP switch
     if ((width == 0) || (height == 0)) {
         if ((*VKY3_B_MCR & VKY3_B_HIRES) == 0) {
-            width = 800;
-            height = 600;
+            width = 1280;
+            height = 1024;
         } else {
-            width = 640;
-            height = 480;
+            width = 1280;
+            height = 960;
         }
-    }
-
-    // Kick the PLL
-    // If VICKY is generating a 40MHz signal, we need to switch the bit to go to 40MHz before
-    // clearing it to go back to 25MHz.
-    if (*VKY3_B_MCR & VKY3_B_CLK40) {
-        *VKY3_B_MCR |= VKY3_B_PLL | VKY3_B_MODE1;
-        *VKY3_B_MCR &= ~(VKY3_B_PLL | VKY3_B_MODE1);
     }
 
     for (i = 0; i < a2560k_b_caps.resolution_count; i++) {
         if ((a2560k_b_caps.resolutions[i].width == width) && (a2560k_b_caps.resolutions[i].height == height)) {
-            msr_shadow_b &= ~(VKY3_B_DOUBLE | VKY3_B_MODE0 | VKY3_B_MODE1);
-            if (height < 400) {
-                /* We're in pixel doubling range */
-                msr_shadow_b |= VKY3_B_DOUBLE;
-
-                /* Figure out what the base resolution is */
-                height *= 2;
-            }
+            msr_shadow_b &= ~(VKY3_B_MODE0 | VKY3_B_MODE1);
 
             // Use the height to determine the resolution we should set
             switch (height) {
-                case 400:   // 640x400 or 320x200 (mode = 11)
-                    msr_shadow_b |= VKY3_B_MODE0;
+                case 960:   // (mode = 00)
                     break;
 
-                case 480:   // 640x480 or 320x240 (mode = 00)
-                    break;
-
-                case 600:   // 800x600 or 400x300 (mode = 01)
-                    msr_shadow_b |= VKY3_B_PLL | VKY3_B_MODE1;
+                case 1024:   // (mode = 01)
+                    msr_shadow_b |= VKY3_B_MODE1;
                     break;
 
                 default:
@@ -268,13 +249,6 @@ short txt_a2560k_b_set_resolution(short width, short height) {
 
             // Recalculate the size of the screen
             txt_a2560k_b_set_sizes();
-
-            // Kick the PLL
-            if (*VKY3_B_MCR & VKY3_B_PLL) {
-                *VKY3_B_MCR &= ~(VKY3_B_PLL | VKY3_B_MODE0 | VKY3_B_MODE1);
-                *VKY3_B_MCR |= (VKY3_B_PLL | VKY3_B_MODE1);
-            }
-            *VKY3_B_MCR &= ~(VKY3_B_PLL | VKY3_B_MODE0 | VKY3_B_MODE1);
 
             // Update the register
             *VKY3_B_MCR = msr_shadow_b;
@@ -613,27 +587,18 @@ void txt_a2560k_b_put(char c) {
 }
 
 void txt_a2560k_b_init() {
-    t_rect region;
     int i;
-
-    // Kick the PLL
-    // If VICKY is generating a 40MHz signal, we need to switch the bit to go to 40MHz before
-    // clearing it to go back to 25MHz.
-    if (*VKY3_B_MCR & VKY3_B_CLK40) {
-        *VKY3_B_MCR |= VKY3_B_PLL | VKY3_B_MODE1;
-        *VKY3_B_MCR &= ~(VKY3_B_PLL | VKY3_B_MODE1);
-    }
-
-    a2560k_b_resolution.width = 0;
-    a2560k_b_resolution.height = 0;
-    a2560k_b_font_size.width = 0;
-    a2560k_b_font_size.height = 0;
+    
+    a2560k_b_resolution.width = 1280;
+    a2560k_b_resolution.height = 1024;
+    a2560k_b_font_size.width = 8;
+    a2560k_b_font_size.height = 16;
 
     /* Disable the set_sizes call for now */
     a2560k_b_enable_set_sizes = 0;
 
     /* Start with nothing on */
-    msr_shadow_b = 0;
+    msr_shadow_b = 0x00000103;
 
     /* Define the capabilities */
 
@@ -641,27 +606,19 @@ void txt_a2560k_b_init() {
     a2560k_b_caps.number = TXT_SCREEN_A2560K_B;
 
     /* This screen can be nothing, sleep, or any combination of text, sprite, bitmap, and tile */
-    a2560k_b_caps.supported_modes = TXT_MODE_TEXT | TXT_MODE_SPRITE | TXT_MODE_BITMAP | TXT_MODE_TILE | TXT_MODE_SLEEP;
+    a2560k_b_caps.supported_modes = TXT_MODE_TEXT;
 
     /* Resolutions supported: 320x200, 320x240, 400x300, 640x400, 640x480, 800x600 */
-    a2560k_b_resolutions[0].width = 320;
-    a2560k_b_resolutions[0].height = 200;
-    a2560k_b_resolutions[1].width = 320;
-    a2560k_b_resolutions[1].height = 240;
-    a2560k_b_resolutions[2].width = 400;
-    a2560k_b_resolutions[2].height = 300;
-    a2560k_b_resolutions[3].width = 640;
-    a2560k_b_resolutions[3].height = 400;
-    a2560k_b_resolutions[4].width = 640;
-    a2560k_b_resolutions[4].height = 480;
-    a2560k_b_resolutions[5].width = 800;
-    a2560k_b_resolutions[5].height = 600;
-    a2560k_b_caps.resolution_count = 6;
+    a2560k_b_resolutions[0].width = 1280;
+    a2560k_b_resolutions[0].height = 960;
+    a2560k_b_resolutions[1].width = 1280;
+    a2560k_b_resolutions[1].height = 1024;
+    a2560k_b_caps.resolution_count = 2;
     a2560k_b_caps.resolutions = a2560k_b_resolutions;
 
     /* Channel B supports 8x8 fonts ONLY */
     a2560k_b_fonts[0].width = 8;
-    a2560k_b_fonts[0].height = 8;
+    a2560k_b_fonts[0].height = 16;
     a2560k_b_caps.font_size_count = 1;
     a2560k_b_caps.font_sizes = a2560k_b_fonts;
 
@@ -671,19 +628,19 @@ void txt_a2560k_b_init() {
         VKY3_B_TEXT_LUT_BG[i] = pal_vt52[i];
     }
 
+    *VKY3_B_MCR = msr_shadow_b;
     /* Set the mode to text */
-    txt_a2560k_b_set_mode(TXT_MODE_TEXT);
+    //txt_a2560k_b_set_mode(TXT_MODE_TEXT);
 
     /* Set the resolution */
-    txt_a2560k_b_set_resolution(640, 480);                  /* Default resolution is 640x480 */
-    //txt_a2560k_b_set_resolution(800, 600);                  /* Default resolution is 640x480 */
+    //txt_a2560k_b_set_resolution(1280, 1024);                  /* Default resolution is 640x480 */
 
     /* Set the default color: light grey on dark grey */
     // txt_a2560k_b_set_color(0x0F, 0x08);
     txt_a2560k_b_set_color(0x0C, 0x04);
 
     /* Set the font */
-    txt_a2560k_b_set_font(8, 8, fontdata_8x8);         /* Use 8x8 font */
+    txt_a2560k_b_set_font(8, 16, fontdata_8x16);         /* Use 8x8 font */
 
     /* Set the cursor */
     txt_a2560k_b_set_cursor(1, 0, 0xB1);
@@ -699,12 +656,6 @@ void txt_a2560k_b_init() {
     a2560k_b_enable_set_sizes = 1;
     txt_a2560k_b_set_sizes();
 
-    /* Set region to default */
-    region.origin.x = 0;
-    region.origin.y = 0;
-    region.size.width = 0;
-    region.size.height = 0;
-    txt_a2560k_b_set_region(&region);
 
     /* Home the cursor */
     txt_a2560k_b_set_xy(0, 0);

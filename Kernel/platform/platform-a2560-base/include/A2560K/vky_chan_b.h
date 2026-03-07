@@ -54,4 +54,42 @@
 #define VKY3_B_TEXT_LUT_FG  ((volatile unsigned long *)0xFECAC400)  /**< Text foreground color look up table for channel B */
 #define VKY3_B_TEXT_LUT_BG  ((volatile unsigned long *)0xFECAC440)  /**< Text background color look up table for channel B */
 
+/*
+
+
+// Video Clock Synced
+assign Mstr_Ctrl_Text_Mode_Enable_o             = Master_Control_Reg[0];                // VICKY_MASTER_REG[0][0];
+assign Mstr_Ctrl_Text_Mode_Overlay_o            = Master_Control_Reg[1];                // VICKY_MASTER_REG[0][1];
+// CPU Clock Synced
+assign Mstr_Ctrl_Graphic_Mode_Enable_o          = Master_Control_Reg[2];                // Graphics Mode On
+assign Mstr_Ctrl_Bitmap_Enable_o                = Master_Control_Reg[3];                // VICKY_MASTER_REG[0][3];
+assign Mstr_Ctrl_TileMap_Enable_o               = Master_Control_Reg[4];                // VICKY_MASTER_REG[0][4];
+assign Mstr_Ctrl_Sprite_Enable_o                = Master_Control_Reg[5];                // VICKY_MASTER_REG[0][5];
+assign Mstr_Ctrl_GAMMA_Enable_o                 = Mstr_Ctrl_GAMMA_int_extern ? Master_Control_Reg[6] : DIPSwitch_GAMMA_i;     //Master_Control_Reg_VidClk[2][17] : DIPSwitch_GAMMA_i;
+assign Mstr_Ctrl_Disable_Video_o                = Master_Control_Reg[7];                 // VICKY_MASTER_REG[0][7];
+assign Mstr_Ctrl_Video_Mode_o[1:0]              = Master_Control_Reg[9:8];               // Video Clock Synced
+assign Mstr_Ctrl_Pixel_Division_o               = Master_Control_Reg[11:10];             // 00: Full Resolution, 01: divided by 2, 10: divided by 4
+assign Mstr_Ctrl_Turn_Off_Sync_o                = !Master_Control_Reg[12];               // Turn-Off Sync to get the Monitor to Sleep
+assign Mstr_Ctrl_FONT_Show_BG_in_Overlay_o      = Master_Control_Reg[13];                // Overlay with BG See-through
+assign Mstr_Ctrl_MemText_Enable_o               = Master_Control_Reg[14] & !Master_Control_Reg[20];     // Memtext Mode ON <<<<< NEW
+assign Mstr_Ctrl_MemText_ShowBG_o               = Master_Control_Reg[15];                // Memtext Mode BG See-Through <<<< NEW (Not tested)
+assign Mstr_Ctrl_Game_GUI_Mode_o                = Master_Control_Reg[16];                // GUI = 0, GAME = 1 ????
+assign Mstr_Ctrl_GAMMA_int_extern               = Master_Control_Reg[17];                // 0 = DipSwitch, 1 = Register Choice
+// Nothing Yet @ VICKY_MASTER_REG[0][18];
+// Nothing Yet @ VICKY_MASTER_REG[0][19];
+assign Mstr_Ctrl_TOS_Graph_Enable_o                =  Master_Control_Reg[20] & !Master_Control_Reg[14];                // Enable EMUTOS Bitmap Mode (Mutually Exclusive with memtext)
+
+// Nothing Yet @ VICKY_MASTER_REG[0][23];
+assign Mstr_Ctrl_Game_Layer0_Enable_o            = Master_Control_Reg[24];                // Game Engine Layer0 Enable
+assign Mstr_Ctrl_Game_Layer0_Type_o                = Master_Control_Reg[25];                // Game Engine Layer0 Type (0 = Bitmap, 1 = TileMap)
+assign Mstr_Ctrl_Game_Layer1_Enable_o            = Master_Control_Reg[26];                // Game Engine Layer1 Enable
+assign Mstr_Ctrl_Game_Layer1_Type_o                = Master_Control_Reg[27];                // Game Engine Layer1 Type (0 = Bitmap, 1 = TileMap)
+assign Mstr_Ctrl_Game_Layer2_Enable_o            = Master_Control_Reg[28];                // Game Engine Layer2 Enable
+assign Mstr_Ctrl_Game_Layer2_Type_o                = Master_Control_Reg[29];                // Game Engine Layer2 Type (0 = Bitmap, 1 = TileMap)
+assign Mstr_Ctrl_Game_Layer3_Enable_o            = Master_Control_Reg[30];                // Game Engine Layer3 Enable
+assign Mstr_Ctrl_Game_Layer3_Type_o                = Master_Control_Reg[31];                // Game Engine Layer3 Type (0 = Bitmap, 1 = TileMap)
+
+
+*/
+
 #endif
