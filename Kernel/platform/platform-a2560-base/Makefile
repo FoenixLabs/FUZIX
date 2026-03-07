@@ -71,7 +71,7 @@ image:
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
 	../../syscall_proc.o ../../syscall_other.o ../../mm.o ../../flat.o \
 	../../blk512.o ../../tty.o ../../devsys.o ../../usermem.o ../../syscall_fs2.o \
-	../../syscall_fs3.o ../../syscall_exec32.o ../../syscall_exec.o ../../font8x8.o \
+	../../syscall_fs3.o ../../syscall_exec32.o ../../syscall_exec.o ../../font8x16.o \
 	../../vt.o ../../devinput.o \
 	../../cpu-68000/usermem_std-68000.o ../../malloc.o \
 	../../level2.o ../../syscall_level2.o ../../select.o > ../../fuzix.map

@@ -7,16 +7,12 @@
 #define TTY_INIT_BAUD B115200
 
 #define CONFIG_VT
-#define CONFIG_FONT8X8
+#define CONFIG_FONT8X16
 
-/* that platforms can use multiple resolutions */
-signed char a2560k_b_text_width();
-signed char a2560k_b_text_height();
-signed char a2560k_b_text_stride();
-
-#define VT_WIDTH  a2560k_b_text_stride()
-#define VT_RIGHT  a2560k_b_text_width()
-#define VT_BOTTOM a2560k_b_text_height()
+#define VT_WIDTH  160
+#define VT_RIGHT  158
+#define VT_HEIGHT 64
+#define VT_BOTTOM 62
 
 /* #define CONFIG_DEBUG_LOG */
 
